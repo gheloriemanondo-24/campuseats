@@ -34,7 +34,7 @@ class _OrderScreenState extends State<OrderScreen> {
   }
 
   Future<void> _addItem() async {
-    final chosen = await showModalBottomSheet<String>(
+    final chosen = await showModalBottomSheet<MenuItem>(
       context: context,
       backgroundColor: AppColors.paper,
       showDragHandle: true,
@@ -69,7 +69,7 @@ class _OrderScreenState extends State<OrderScreen> {
     final order = _store.placeOrder();
     Navigator.of(context).pushReplacement(
       MaterialPageRoute<void>(
-        builder: (_) => ConfirmationScreen(order: order),
+        builder: (_) => ConfirmationScreen(order: order, store: _store),
       ),
     );
   }
@@ -85,6 +85,7 @@ class _OrderScreenState extends State<OrderScreen> {
             final cart = _store.cart;
             final pickup = _store.pickup!;
             final count = _store.itemCount;
+            final total = cart.fold<int>(0, (sum, l) => sum + l.total);
 
             return Column(
               children: [
@@ -199,6 +200,26 @@ class _OrderScreenState extends State<OrderScreen> {
                             style: const TextStyle(
                               fontWeight: FontWeight.w700,
                               color: AppColors.muted,
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 6),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          const Text(
+                            'Total',
+                            style: TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.w800,
+                            ),
+                          ),
+                          Text(
+                            formatPrice(total),
+                            style: const TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.w800,
                             ),
                           ),
                         ],
@@ -332,12 +353,24 @@ class _CartRow extends StatelessWidget {
           child: Row(
             children: [
               Expanded(
-                child: Text(
-                  line.name,
-                  style: const TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w700,
-                  ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      line.name,
+                      style: const TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                    Text(
+                      '${formatPrice(line.price)} each',
+                      style: const TextStyle(
+                        fontSize: 13,
+                        color: AppColors.muted,
+                      ),
+                    ),
+                  ],
                 ),
               ),
               IconButton(
@@ -444,21 +477,38 @@ class _MenuSheet extends StatelessWidget {
             child: ListView(
               shrinkWrap: true,
               children: [
-                for (final name in place.menu)
+                for (final item in place.menu)
                   ListTile(
+                    enabled: item.available,
                     contentPadding: const EdgeInsets.symmetric(horizontal: 24),
                     title: Text(
-                      name,
+                      item.name,
                       style: const TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.w700,
                       ),
                     ),
-                    subtitle: inCart.containsKey(name)
-                        ? Text('In your order: ${inCart[name]}')
+                    subtitle: !item.available
+                        ? const Text('Sold out')
+                        : inCart.containsKey(item.name)
+                        ? Text('In your order: ${inCart[item.name]}')
                         : null,
-                    trailing: const Icon(Icons.add_circle_outline),
-                    onTap: () => Navigator.of(context).pop(name),
+                    trailing: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          formatPrice(item.price),
+                          style: const TextStyle(fontWeight: FontWeight.w700),
+                        ),
+                        if (item.available) ...[
+                          const SizedBox(width: 10),
+                          const Icon(Icons.add_circle_outline),
+                        ],
+                      ],
+                    ),
+                    onTap: item.available
+                        ? () => Navigator.of(context).pop(item)
+                        : null,
                   ),
               ],
             ),

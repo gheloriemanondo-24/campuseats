@@ -66,6 +66,26 @@ ThemeData buildTheme() {
       dragHandleColor: AppColors.muted,
     ),
 
+    inputDecorationTheme: InputDecorationTheme(
+      filled: true,
+      fillColor: AppColors.card,
+      labelStyle: const TextStyle(color: AppColors.muted),
+      floatingLabelStyle: const TextStyle(color: AppColors.ink),
+      contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 16),
+      border: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(8),
+        borderSide: const BorderSide(color: AppColors.rule),
+      ),
+      enabledBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(8),
+        borderSide: const BorderSide(color: AppColors.rule),
+      ),
+      focusedBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(8),
+        borderSide: const BorderSide(color: AppColors.ink, width: 1.5),
+      ),
+    ),
+
     textButtonTheme: TextButtonThemeData(
       style: TextButton.styleFrom(foregroundColor: AppColors.ink),
     ),

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'app_theme.dart';
+import 'models/models.dart';
 
 class Wordmark extends StatelessWidget {
   const Wordmark({super.key});
@@ -214,6 +215,184 @@ class DashedDivider extends StatelessWidget {
           ),
         );
       },
+    );
+  }
+}
+
+// big options: Student, Teacher or Stall staff
+class RoleSelector extends StatelessWidget {
+  const RoleSelector({
+    super.key,
+    required this.selected,
+    required this.onChanged,
+    this.enabled = true,
+  });
+
+  final UserRole selected;
+  final ValueChanged<UserRole> onChanged;
+  final bool enabled;
+
+  static const _icons = {
+    UserRole.student: Icons.school_outlined,
+    UserRole.teacher: Icons.badge_outlined,
+    UserRole.stallStaff: Icons.storefront_outlined,
+  };
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        for (final role in UserRole.values) ...[
+          if (role != UserRole.values.first) const SizedBox(width: 10),
+          Expanded(
+            child: _RoleOption(
+              role: role,
+              icon: _icons[role]!,
+              selected: selected == role,
+              onTap: enabled ? () => onChanged(role) : null,
+            ),
+          ),
+        ],
+      ],
+    );
+  }
+}
+
+class _RoleOption extends StatelessWidget {
+  const _RoleOption({
+    required this.role,
+    required this.icon,
+    required this.selected,
+    required this.onTap,
+  });
+
+  final UserRole role;
+  final IconData icon;
+  final bool selected;
+  final VoidCallback? onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return Semantics(
+      button: true,
+      selected: selected,
+      label: role.label,
+      child: Material(
+        color: selected ? AppColors.card : Colors.transparent,
+        clipBehavior: Clip.antiAlias,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(8),
+          side: BorderSide(
+            color: selected ? AppColors.ink : AppColors.rule,
+            width: selected ? 1.5 : 1,
+          ),
+        ),
+        child: InkWell(
+          onTap: onTap,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(vertical: 16),
+            child: Column(
+              children: [
+                Icon(icon, color: selected ? AppColors.ink : AppColors.muted),
+                const SizedBox(height: 6),
+                Text(
+                  role.label,
+                  style: TextStyle(
+                    fontWeight: FontWeight.w700,
+                    color: selected ? AppColors.ink : AppColors.muted,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+// a short error message shown above a form's button
+class ErrorBanner extends StatelessWidget {
+  const ErrorBanner(this.message, {super.key});
+
+  final String message;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: AppColors.removeBackground,
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Icon(Icons.error_outline, size: 20),
+          const SizedBox(width: 10),
+          Expanded(child: Text(message, style: const TextStyle(height: 1.3))),
+        ],
+      ),
+    );
+  }
+}
+
+// "Kumusta, Maria" with a role badge and a log out button
+class UserStrip extends StatelessWidget {
+  const UserStrip({super.key, required this.user, required this.onLogOut});
+
+  final AppUser user;
+  final VoidCallback onLogOut;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        Expanded(
+          child: Wrap(
+            crossAxisAlignment: WrapCrossAlignment.center,
+            spacing: 10,
+            runSpacing: 6,
+            children: [
+              Text(
+                'Kumusta, ${user.firstName}',
+                style: const TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+              Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 10,
+                  vertical: 3,
+                ),
+                decoration: BoxDecoration(
+                  color: AppColors.tomatoSoft,
+                  borderRadius: BorderRadius.circular(20),
+                  border: Border.all(color: AppColors.rule),
+                ),
+                child: Text(
+                  user.role.label,
+                  style: const TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w700,
+                    color: AppColors.muted,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+        TextButton.icon(
+          onPressed: onLogOut,
+          icon: const Icon(Icons.logout, size: 18),
+          label: const Text('Log out'),
+          style: TextButton.styleFrom(
+            textStyle: const TextStyle(fontWeight: FontWeight.w700),
+          ),
+        ),
+      ],
     );
   }
 }
